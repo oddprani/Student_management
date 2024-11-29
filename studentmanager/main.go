@@ -4,12 +4,13 @@ import (
 	"log"
 	"studentmanager/config"
 	"studentmanager/database"
+	"studentmanager/middleware"
+	"studentmanager/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
@@ -29,9 +30,9 @@ func main() {
 
 	app := fiber.New()
 
-	app.Use(recover.New(recover.Config{
-		EnableStackTrace: config.Debug,
-	}))
+	// app.Use(recover.New(recover.Config{
+	// 	EnableStackTrace: config.Debug,
+	// }))
 
 	app.Use(cors.New(cors.Config{
 		AllowHeaders: "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,Authorization",
@@ -40,6 +41,9 @@ func main() {
 	}))
 	app.Use(logger.New())
 	app.Use(helmet.New())
+	app.Use(middleware.AuthenticationMiddleware)
+
+	router.Initialise(app)
 
 	log.Fatal(app.Listen(":" + config.Port))
 }

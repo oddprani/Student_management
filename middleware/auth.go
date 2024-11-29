@@ -14,9 +14,14 @@ func AuthenticationMiddleware(c *fiber.Ctx) error {
 	}
 
 	// Check session in the database and retrieve the user
-	var user database.User
+	user := &database.User{}
+	session := &database.Session{}
 
-	if err := database.DBInstance.Where("token = ?", token).Preload("Sessions").First(&user).Error; err != nil {
+	if err := database.DBInstance.Where("token = ?", token).First(session).Error; err != nil {
+		return c.Next()
+	}
+
+	if err := database.DBInstance.Where("id = ?", session.UserID).First(user).Error; err != nil {
 		return c.Next()
 	}
 
